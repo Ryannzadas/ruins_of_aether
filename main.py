@@ -1,6 +1,6 @@
 """
 Ruins of Aether - A Tale of Lost Worlds
-RPG narrativo para console Windows.
+RPG narrativo dark para console Windows.
 """
 
 import sys
@@ -12,13 +12,14 @@ from core import (
     C,
     Game,
     clear_screen,
+    humanity_bar,
     pause,
     print_narration,
     print_success,
     print_title,
     print_ui,
 )
-from story import run_chapter_1, run_placeholder_chapter
+from story import run_chapter_1, run_from_current_chapter
 
 init(autoreset=True)
 
@@ -31,14 +32,14 @@ def show_banner() -> None:
     ║          R U I N S   O F   A E T H E R                ║
     ║           A Tale of Lost Worlds                       ║
     ║                                                       ║
-    ║     Fantasia  ·  Pós-Apocalíptico  ·  RPG           ║
+    ║     Dark Fantasy  ·  Sci-Fi  ·  Filosófico            ║
     ║                                                       ║
     ╚═══════════════════════════════════════════════════════╝
 {C.RESET}"""
     print(banner)
     print_narration(
-        "  Um mundo destruído pelo Cataclismo. Uma Torre que guarda segredos.\n"
-        "  Você acordou sem memória — e o Éter ainda sussurra seu nome."
+        "  A Torre guarda segredos. Você acordou sem memória.\n"
+        "  Mas algo dentro de você sabe: você não deveria estar aqui."
     )
     print()
 
@@ -72,14 +73,11 @@ def new_game() -> None:
     game = Game(player_name=name)
 
     clear_screen()
-    print_success(f"\nBem-vindo, {name}. Sua jornada começa agora.")
+    print_success(f"\nBem-vindo, {name}.")
+    print_narration("A Torre aguarda. E algo dentro dela aguarda você.")
     pause()
 
-    if not run_chapter_1(game):
-        clear_screen()
-        print_ui("\nGame Over.")
-        print_narration("Talvez em outra tentativa, a Torre revele seus segredos...")
-        pause()
+    run_from_current_chapter(game)
 
 
 def load_game() -> None:
@@ -98,22 +96,19 @@ def load_game() -> None:
         return
 
     clear_screen()
-    print_success(f"\nSave carregado!")
+    print_success("\nSave carregado!")
     print_ui(f"  Personagem: {game.player.name}")
     print_ui(f"  Nível: {game.player.level}  |  HP: {game.player.hp}/{game.player.max_hp}")
+    print_ui(f"  {humanity_bar(game.player.humanity)}")
     print_ui(f"  Capítulo: {game.story.current_chapter}")
-    pause()
 
-    chapter = game.story.current_chapter
-    if chapter == 1 and not game.story.get_flag("chapter1_complete"):
-        if not run_chapter_1(game):
-            clear_screen()
-            print_ui("\nGame Over.")
-            pause()
-    elif chapter == 1:
-        run_placeholder_chapter(2)
-    else:
-        run_placeholder_chapter(chapter)
+    if game.story.kael_logs:
+        print_ui(f"\n  Último log de Kael: {game.story.kael_logs[-1][:60]}...")
+    if game.story.lyra_notes:
+        print_ui(f"  Última nota de Lyra: {game.story.lyra_notes[-1][:60]}...")
+
+    pause()
+    run_from_current_chapter(game)
 
 
 def show_credits() -> None:
@@ -121,19 +116,19 @@ def show_credits() -> None:
     print_title("═══════════════ CRÉDITOS ═══════════════")
     print()
     print_ui("  Ruins of Aether - A Tale of Lost Worlds")
-    print_narration("  Um RPG narrativo inspirado em Undertale/Deltarune")
+    print_narration("  RPG narrativo dark · Undertale meets sci-fi distópico")
     print()
     print_ui("  Desenvolvido em Python")
     print_ui("  Bibliotecas: inquirer, colorama")
     print()
     print_narration("  Personagens:")
-    print_narration("    • Você — Protagonista sem memória")
-    print_narration("    • Kael — Guardião da Torre")
-    print_narration("    • Lyra — Arqueóloga (capítulos futuros)")
-    print_narration("    • Mors — Entidade misteriosa (capítulos futuros)")
+    print_narration("    • Você (ERRO-7) — Programa de auto-destruição humanóide")
+    print_narration("    • Kael — Programa de inteligência, guardião da Torre")
+    print_narration("    • Lyra — Arqueóloga, descendente dos criadores da IA")
+    print_narration("    • Mors — A IA. Lógica absoluta. Reset do mundo.")
     print()
-    print_ui("  Capítulo 1: A Torre Inicial — Implementado")
-    print_ui("  Capítulos 2-5: Em breve")
+    print_ui("  5 Capítulos · 3 Finais · Humanidade vs Máquina")
+    print_ui("  Capítulos 1-5: Implementados")
     print()
     pause()
 
@@ -148,7 +143,7 @@ def main_menu() -> None:
 
         if choice is None or choice == "Sair":
             clear_screen()
-            print_narration("\nO Éter aguarda seu retorno...")
+            print_narration("\n0x7F4A8C — O Éter aguarda seu retorno...")
             break
         elif choice == "Novo Jogo":
             new_game()
