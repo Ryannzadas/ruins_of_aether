@@ -50,7 +50,7 @@ def chapter_1_awakening(game: Game) -> None:
     pause()
     _slow_print("Pedra fria sob suas costas. Ar úmido. Um zumbido distante.")
     pause()
-    _slow_print("Não lembra de nada — nem de como chegou aqui.")
+    _slow_print("Não lembra de nada nem de como chegou aqui.")
     pause()
 
     clear_screen()
@@ -68,7 +68,7 @@ def chapter_1_meet_kael(game: Game) -> None:
     clear_screen()
     print_narration(
         "\nAo subir os primeiros degraus, uma figura encapuzada surge das sombras. "
-        "Armadura desgastada, olhar cansado — mas alerta."
+        "Armadura desgastada, olhar cansado mas alerta."
     )
     pause()
 
@@ -87,7 +87,7 @@ def chapter_1_cataclysm_choice(game: Game) -> None:
     clear_screen()
     _dialogue("Kael", [
         "Antes de prosseguir, preciso saber: você conhece o Cataclismo?",
-        "Foi o dia em que o Éter — a energia que sustentava nosso mundo — "
+        "Foi o dia em que o Éter a energia que sustentava nosso mundo "
         "se corrompeu. Cidades caíram. Mundos se desfizeram.",
         "Esta Torre é um dos últimos fragmentos do mundo antigo. "
         "E você... desapareceu aqui no dia do Cataclismo.",
@@ -111,7 +111,7 @@ def chapter_1_cataclysm_choice(game: Game) -> None:
         game.story.set_flag("cataclysm_choice", "truth")
         _dialogue("Kael", [
             "Coragem. Poucos querem saber a verdade.",
-            "O Cataclismo não foi um acidente. Alguém — ou algo — "
+            "O Cataclismo não foi um acidente. Alguém ou algo "
             "quebrou o selo do Éter Primordial.",
             "As Ruínas de Éter são tudo o que restou. E esta Torre... "
             "guarda segredos que nem eu compreendo totalmente.",
@@ -125,7 +125,7 @@ def chapter_1_cataclysm_choice(game: Game) -> None:
         _dialogue("Kael", [
             "Desconfiança é sabedoria nestes tempos.",
             "Não peço que acredite em mim. Peço apenas que observe.",
-            "A Torre não mente — ela mostra o que foi, não o que queremos ver.",
+            "A Torre não mente, ela mostra o que foi, não o que queremos ver.",
         ])
         print_narration("\nKael cruza os braços, mas não parece ofendido.")
         pause()
@@ -183,7 +183,7 @@ def chapter_1_conclusion(game: Game) -> None:
     if result == "pacified":
         _dialogue("Kael", [
             "Incrível... você pacificou o espectro.",
-            "Não vi isso em décadas. Há compaixão em você — "
+            "Não vi isso em décadas. Há compaixão em você "
             "algo que este mundo perdeu há muito tempo.",
             "Talvez você seja a chave que estávamos esperando.",
         ])
@@ -212,7 +212,7 @@ def chapter_1_conclusion(game: Game) -> None:
     _dialogue("Kael", [
         extra,
         "O primeiro andar está seguro por agora. Mas a Torre tem muitos segredos.",
-        "Descanse. Amanhã, subiremos mais alto — se você estiver pronto.",
+        "Descanse. Amanhã, subiremos mais alto se você estiver pronto.",
         "Lyra, a arqueóloga, está nos níveis superiores. Talvez ela saiba mais.",
         "E há rumores sobre... Mors. Uma entidade que ninguém ousa nomear em voz alta.",
     ])
