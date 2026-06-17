@@ -1,165 +1,108 @@
-"""
-Ruins of Aether - A Tale of Lost Worlds
-RPG narrativo dark para console Windows.
-"""
-
+import os
 import sys
-
+from colorama import Fore, Back, Style, init
 import inquirer
-from colorama import init
+from story import GameFlow
+from core import Game
 
-from core import (
-    C,
-    Game,
-    clear_screen,
-    humanity_bar,
-    pause,
-    print_narration,
-    print_success,
-    print_title,
-    print_ui,
-)
-from story import run_chapter_1, run_from_current_chapter
-
+# Inicializa colorama para Windows
 init(autoreset=True)
 
+def clear_screen():
+    """Limpa a tela do console"""
+    os.system('cls' if os.name == 'nt' else 'clear')
 
-def show_banner() -> None:
-    clear_screen()
-    banner = f"""{C.CYAN}{C.BOLD}
-    ╔═══════════════════════════════════════════════════════╗
-    ║                                                       ║
-    ║          R U I N S   O F   A E T H E R                ║
-    ║           A Tale of Lost Worlds                       ║
-    ║                                                       ║
-    ║     Dark Fantasy  ·  Sci-Fi  ·  Filosófico            ║
-    ║                                                       ║
-    ╚═══════════════════════════════════════════════════════╝
-{C.RESET}"""
-    print(banner)
-    print_narration(
-        "  A Torre guarda segredos. Você acordou sem memória.\n"
-        "  Mas algo dentro de você sabe: você não deveria estar aqui."
-    )
+def show_title():
+    """Exibe o título do jogo"""
+    print(Fore.CYAN + "=" * 70)
+    print(Fore.CYAN + " " * 15 + "RUINS OF AETHER")
+    print(Fore.CYAN + " " * 10 + "A Tale of Lost Worlds")
+    print(Fore.CYAN + "=" * 70)
     print()
 
-
-def _menu(message: str, choices: list[str]) -> str | None:
+def main_menu():
+    """Menu principal com navegação por setas"""
+    clear_screen()
+    show_title()
+    
     questions = [
-        inquirer.List("option", message=message, choices=choices, carousel=True)
-    ]
-    answer = inquirer.prompt(questions)
-    return answer["option"] if answer else None
-
-
-def ask_player_name() -> str:
-    questions = [
-        inquirer.Text(
-            "name",
-            message="Como você se chama? (Enter para 'Viajante')",
-            default="Viajante",
+        inquirer.List('action',
+            message=Fore.YELLOW + 'O que deseja fazer?',
+            choices=[
+                'Novo Jogo',
+                'Carregar Jogo',
+                'Créditos',
+                'Sair'
+            ],
+            carousel=True
         )
     ]
-    answer = inquirer.prompt(questions)
-    if answer is None:
-        return "Viajante"
-    name = answer["name"].strip()
-    return name if name else "Viajante"
+    
+    answers = inquirer.prompt(questions)
+    return answers['action']
 
-
-def new_game() -> None:
-    show_banner()
-    name = ask_player_name()
-    game = Game(player_name=name)
-
+def credits():
+    """Tela de créditos"""
     clear_screen()
-    print_success(f"\nBem-vindo, {name}.")
-    print_narration("A Torre aguarda. E algo dentro dela aguarda você.")
-    pause()
+    show_title()
+    
+    print(Fore.YELLOW + """
+    ╔════════════════════════════════════╗
+    ║           CRÉDITOS                 ║
+    ╠════════════════════════════════════╣
+    ║ Desenvolvido por: Ryan             ║
+    ║ Gênero: Fantasia + Pós-Apocalíptico║
+    ║ Inspiração: Undertale, Deltarune   ║
+    ║                                    ║
+    ║ Obrigado por jogar! ✨              ║
+    ╚════════════════════════════════════╝
+    """)
+    
+    input(Fore.CYAN + "Pressione ENTER para voltar...")
 
-    run_from_current_chapter(game)
+def new_game():
+    """Inicia um novo jogo"""
+    game_flow = GameFlow()
+    game_flow.start_new_game()
 
-
-def load_game() -> None:
-    if not Game.has_save():
-        clear_screen()
-        print_ui("\nNenhum save encontrado.")
-        print_narration("Inicie um Novo Jogo para criar um progresso.")
-        pause()
-        return
-
-    game = Game.load()
-    if game is None:
-        clear_screen()
-        print_ui("\nErro ao carregar o save.")
-        pause()
-        return
-
+def load_game():
+    """Carrega um jogo existente"""
     clear_screen()
-    print_success("\nSave carregado!")
-    print_ui(f"  Personagem: {game.player.name}")
-    print_ui(f"  Nível: {game.player.level}  |  HP: {game.player.hp}/{game.player.max_hp}")
-    print_ui(f"  {humanity_bar(game.player.humanity)}")
-    print_ui(f"  Capítulo: {game.story.current_chapter}")
+    show_title()
+    
+    game = Game()
+    if game.load_game():
+        print(Fore.GREEN + f"\n✓ Jogo carregado! Bem-vindo de volta, {game.player.name}!\n")
+        print(Fore.YELLOW + f"Capítulo: {game.story.chapters[game.story.current_chapter]}")
+        print(Fore.YELLOW + f"Level: {game.player.level} | HP: {game.player.hp}/{game.player.max_hp}")
+        input(Fore.CYAN + "\nPressione ENTER para continuar...")
+        # TODO: Continuar o jogo de onde parou
+    else:
+        print(Fore.RED + "\n✗ Nenhum jogo salvo encontrado!\n")
+        input(Fore.CYAN + "Pressione ENTER para voltar...")
 
-    if game.story.kael_logs:
-        print_ui(f"\n  Último log de Kael: {game.story.kael_logs[-1][:60]}...")
-    if game.story.lyra_notes:
-        print_ui(f"  Última nota de Lyra: {game.story.lyra_notes[-1][:60]}...")
-
-    pause()
-    run_from_current_chapter(game)
-
-
-def show_credits() -> None:
-    clear_screen()
-    print_title("═══════════════ CRÉDITOS ═══════════════")
-    print()
-    print_ui("  Ruins of Aether - A Tale of Lost Worlds")
-    print_narration("  RPG narrativo dark · Undertale meets sci-fi distópico")
-    print()
-    print_ui("  Desenvolvido em Python")
-    print_ui("  Bibliotecas: inquirer, colorama")
-    print()
-    print_narration("  Personagens:")
-    print_narration("    • Você (ERRO-7) — Programa de auto-destruição humanóide")
-    print_narration("    • Kael — Programa de inteligência, guardião da Torre")
-    print_narration("    • Lyra — Arqueóloga, descendente dos criadores da IA")
-    print_narration("    • Mors — A IA. Lógica absoluta. Reset do mundo.")
-    print()
-    print_ui("  5 Capítulos · 3 Finais · Humanidade vs Máquina")
-    print_ui("  Capítulos 1-5: Implementados")
-    print()
-    pause()
-
-
-def main_menu() -> None:
-    while True:
-        show_banner()
-        choice = _menu(
-            "Use ↑↓ para navegar, Enter para selecionar:",
-            ["Novo Jogo", "Carregar Jogo", "Créditos", "Sair"],
-        )
-
-        if choice is None or choice == "Sair":
-            clear_screen()
-            print_narration("\n0x7F4A8C — O Éter aguarda seu retorno...")
-            break
-        elif choice == "Novo Jogo":
+def main():
+    """Loop principal do jogo"""
+    running = True
+    
+    while running:
+        choice = main_menu()
+        
+        if choice == 'Novo Jogo':
             new_game()
-        elif choice == "Carregar Jogo":
+        elif choice == 'Carregar Jogo':
             load_game()
-        elif choice == "Créditos":
-            show_credits()
-
-
-def main() -> None:
-    try:
-        main_menu()
-    except KeyboardInterrupt:
-        print(f"\n{C.YELLOW}Jogo encerrado.{C.RESET}")
-        sys.exit(0)
-
+        elif choice == 'Créditos':
+            credits()
+        elif choice == 'Sair':
+            clear_screen()
+            print(Fore.YELLOW + "Até logo, viajante...\n")
+            running = False
+            break
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print(Fore.RED + "\n\nJogo interrompido pelo usuário.")
+        sys.exit(0)
