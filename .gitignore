@@ -23,3 +23,9 @@ saves/
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# Web
+node_modules/
+dist/
+.vercel/
+.superpowers/
