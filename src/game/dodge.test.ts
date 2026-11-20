@@ -1,0 +1,63 @@
+import { BOX, SOUL_RADIUS, SOUL_SPEED, startDodge, stepDodge, type DodgeSim, type Pattern } from './dodge'
+import { SPECTER_PATTERNS } from './patterns'
+
+const quiet: Pattern = { id: 'quiet', name: 'Silêncio', duration: 5, spawn: () => [] }
+const rng = () => 0.5
+
+function run(sim: DodgeSim, seconds: number, input = { dx: 0, dy: 0 }) {
+  for (let i = 0; i < Math.round(seconds * 60); i++) sim = stepDodge(sim, input, 1 / 60)
+  return sim
+}
+
+test('the soul starts in the middle of the box with no hits', () => {
+  const sim = startDodge(quiet, rng)
+  expect(sim.soul).toEqual({ x: 120, y: 120 })
+  expect(sim.hits).toBe(0)
+  expect(BOX).toBe(240)
+})
+
+test('the soul cannot leave the box', () => {
+  const sim = run(startDodge(quiet, rng), 1, { dx: 1, dy: 0 })
+  expect(sim.soul.x).toBeCloseTo(BOX - SOUL_RADIUS)
+})
+
+test('a long frame (hidden tab) only advances 50 ms', () => {
+  const sim = stepDodge(startDodge(quiet, rng), { dx: 0, dy: 0 }, 2)
+  expect(sim.t).toBeCloseTo(0.05)
+})
+
+test('a hit gives 0.8 s of invulnerability', () => {
+  let sim: DodgeSim = { ...startDodge(quiet, rng), bullets: [{ x: 120, y: 120, vx: 0, vy: 0, r: 5 }] }
+  sim = run(sim, 1 / 60)
+  expect(sim.hits).toBe(1)
+  sim = run(sim, 0.5)
+  expect(sim.hits).toBe(1)
+  sim = run(sim, 0.4)
+  expect(sim.hits).toBe(2)
+})
+
+test('a tap target moves the soul at normal speed, never teleporting', () => {
+  const sim = stepDodge(startDodge(quiet, rng), { target: { x: 200, y: 120 } }, 0.05)
+  expect(sim.soul.x).toBeCloseTo(120 + SOUL_SPEED * 0.05)
+  const arrived = run(startDodge(quiet, rng), 1, { target: { x: 200, y: 120 } } as never)
+  expect(arrived.soul.x).toBeCloseTo(200)
+})
+
+test('diagonal input is normalised', () => {
+  const sim = stepDodge(startDodge(quiet, rng), { dx: 1, dy: 1 }, 0.05)
+  const moved = Math.hypot(sim.soul.x - 120, sim.soul.y - 120)
+  expect(moved).toBeCloseTo(SOUL_SPEED * 0.05)
+})
+
+test.each(SPECTER_PATTERNS.map((p) => [p.name, p] as const))('%s spawns bullets and ends after 5 s', (_name, pattern) => {
+  expect(pattern.duration).toBe(5)
+  let sim = run(startDodge(pattern, rng), 4.9)
+  expect(sim.done).toBe(false)
+  expect(sim.spawned).toBeGreaterThan(0)
+  sim = run(sim, 0.2)
+  expect(sim.done).toBe(true)
+})
+
+test('the specter has the three console patterns', () => {
+  expect(SPECTER_PATTERNS.map((p) => p.name)).toEqual(['Rajada de Dados', 'Colapso de Éter', 'Pulso do Núcleo'])
+})
