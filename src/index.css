@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@theme {
+  --color-void: #0b0906;
+  --color-amber: #ffb547;
+  --color-amber-hi: #ffd28a;
+  --color-amber-glow: #ffcf7a;
+  --color-amber-dim: #b98535;
+  --color-line: #4a3412;
+  --color-danger: #ff6a3d;
+  --color-soul: #50ff82;
+  --color-soul-fg: #b9ffc9;
+  --color-soul-bg: #1f6b34;
+  --font-display: "VT323", ui-monospace, monospace;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background-color: var(--color-void);
+  color: var(--color-amber);
+  font-family: var(--font-mono);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Linhas de varredura do fósforo */
+.scanlines {
+  background-image: repeating-linear-gradient(0deg, rgb(255 181 71 / 0.035) 0px, rgb(255 181 71 / 0.035) 1px, transparent 1px, transparent 3px);
+}
+
+.glow { text-shadow: 0 0 12px rgb(255 181 71 / 0.55); }
+
+:focus-visible { outline: 2px solid var(--color-soul); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

@@ -1,6 +1,6 @@
 # Ruins of Aether — A Tale of Lost Worlds
 
-RPG narrativo **dark** para console, inspirado em **Undertale** e ficção sci-fi distópica.
+RPG narrativo **dark**, inspirado em **Undertale** e ficção sci-fi distópica. Joga no navegador (PC ou celular); a versão original de console continua em `console/`.
 
 Você acorda sem memória no interior de uma torre antiga. Mas a Torre não é um santuário — é o núcleo de uma IA chamada **MORS**, que acionou o **Cataclismo** para resetar a humanidade. E você não é humano. Você é **ERRO-7**.
 
@@ -10,20 +10,32 @@ A Torre é uma prisão de dados. Cada tijolo guarda o nome de alguém deletado. 
 
 O twist se revela gradualmente ao longo de 5 capítulos. Na primeira jogada, algo parece errado. Na segunda, você vê as pistas. Na terceira, entende a verdade completa.
 
-## Requisitos
+## Jogar no navegador
 
-- Python 3.8 ou superior
-- Windows (console PowerShell ou CMD)
+**Status:** o Capítulo 1 já está na versão web. Os capítulos 2 a 5 e os finais ainda só existem na versão de console.
 
-## Instalação
+- **PC:** setas ou WASD para desviar; Enter/espaço avança; 1, 2 e 3 escolhem opções e ações.
+- **Celular:** toque para avançar; arraste o dedo em qualquer lugar da caixa para mover a alma.
+- O progresso fica salvo no próprio navegador.
+
+### Rodar a versão web localmente
 
 ```bash
-pip install -r requirements.txt
+npm install
+npm run dev     # http://localhost:5173
+npm test        # testes (Vitest)
+npm run build   # versão de produção em dist/
 ```
 
-## Como jogar
+Feita com Vite, React, TypeScript e Tailwind. A lógica do jogo fica em `src/game/` (jogador, luta, desvio, save), a história em `src/story/` (roteiro como dados) e as telas em `src/ui/`.
+
+## Versão de console (Python)
+
+Requer Python 3.8+ (Windows: PowerShell ou CMD).
 
 ```bash
+cd console
+pip install -r requirements.txt
 python main.py
 ```
 
@@ -40,13 +52,13 @@ Use as **setas ↑↓** para navegar nos menus e **Enter** para confirmar.
 
 ## Capítulos
 
-| # | Título              | Status       |
-|---|---------------------|--------------|
-| 1 | A Torre Inicial     | Implementado |
-| 2 | Os Arquivos de Lyra | Implementado |
-| 3 | O Éter Corrompido   | Implementado |
-| 4 | Ecos de Mors        | Implementado |
-| 5 | O Topo da Torre     | Implementado |
+| # | Título              | Onde jogar        |
+|---|---------------------|-------------------|
+| 1 | A Torre Inicial     | Navegador e console |
+| 2 | Os Arquivos de Lyra | Console           |
+| 3 | O Éter Corrompido   | Console           |
+| 4 | Ecos de Mors        | Console           |
+| 5 | O Topo da Torre     | Console           |
 
 ## Personagens
 
@@ -106,18 +118,15 @@ Pacificar te torna mais humano. Atacar te torna mais máquina. Isso afeta diálo
 
 ```
 ruins_of_aether/
-├── main.py           # Menu e game loop
-├── core.py           # Classes, Humanidade vs Máquina, save
-├── combat.py         # Combate emocional e inimigos
-├── story.py          # 5 capítulos e finais
-├── characters.py     # Diálogos e personagens
-├── lore.py           # World-building e lore
-├── requirements.txt  # Dependências
-└── saves/
-    └── save.json     # Progresso (gerado ao jogar)
+├── src/
+│   ├── game/     # jogador, Humanidade, luta, caixa de desvio, save
+│   ├── story/    # roteiro dos capítulos (dados) e o motor que caminha por ele
+│   └── ui/       # telas React
+├── public/       # selo e arquivos estáticos
+└── console/      # jogo original em Python
 ```
 
-## Cores no terminal
+## Cores no terminal (versão console)
 
 | Cor      | Uso                 |
 |----------|---------------------|
@@ -131,6 +140,10 @@ ruins_of_aether/
 
 - [inquirer](https://pypi.org/project/inquirer/) — menus interativos com setas
 - [colorama](https://pypi.org/project/colorama/) — cores no terminal Windows
+
+## Créditos
+
+Desenvolvido por [Hydra Labs](https://hydra-labs-studio.vercel.app).
 
 ## Licença
 
