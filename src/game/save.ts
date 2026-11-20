@@ -17,14 +17,35 @@ export function saveGame(d: { player: Player; story: Story }): boolean {
   }
 }
 
+const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v)
+const PLAYER_NUMBERS = ['hp', 'maxHp', 'mp', 'maxMp', 'level', 'exp', 'attack', 'defense', 'humanity'] as const
+
+function isPlayer(p: unknown): p is Player {
+  return isObj(p) && typeof p.name === 'string' && PLAYER_NUMBERS.every((k) => Number.isFinite(p[k]))
+}
+
+function isStory(s: unknown): s is Story {
+  return (
+    isObj(s) &&
+    Number.isFinite(s.chapter) &&
+    isObj(s.cursor) &&
+    typeof s.cursor.label === 'string' &&
+    Number.isInteger(s.cursor.index) &&
+    isObj(s.flags) &&
+    Array.isArray(s.kaelLogs) &&
+    Array.isArray(s.lyraNotes) &&
+    Number.isFinite(s.killed) &&
+    Number.isFinite(s.pacified)
+  )
+}
+
 export function loadGame(): SaveData | null {
   try {
     const raw = localStorage.getItem(SAVE_KEY)
     if (!raw) return null
     const data = JSON.parse(raw) as Partial<SaveData>
     if (data?.version !== VERSION) return null
-    if (!data.player || typeof data.player.hp !== 'number') return null
-    if (!data.story || typeof data.story.cursor?.label !== 'string') return null
+    if (!isPlayer(data.player) || !isStory(data.story)) return null
     return data as SaveData
   } catch {
     return null

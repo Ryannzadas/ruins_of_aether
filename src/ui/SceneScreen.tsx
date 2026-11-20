@@ -4,6 +4,7 @@ import { fillName } from '@/story/runner'
 import type { VisibleStep } from '@/story/types'
 import { Btn, Frame, NextButton } from './kit'
 import { KAEL_PORTRAIT } from './portraits'
+import { useTapGuard } from './useTapGuard'
 import { useTypewriter } from './useTypewriter'
 
 type SceneStep = Exclude<VisibleStep, { kind: 'battle' | 'end' }>
@@ -32,6 +33,7 @@ export function SceneScreen({ step, player, onNext, onChoose }: { step: SceneSte
   const text = fillName(textOf(step), player.name)
   const { shown, done, finish } = useTypewriter(text)
   const choiceRef = useRef<HTMLDivElement>(null)
+  const ready = useTapGuard(step)
 
   const proceed = () => (done ? onNext() : finish())
 
@@ -118,7 +120,7 @@ export function SceneScreen({ step, player, onNext, onChoose }: { step: SceneSte
             <Btn
               key={o.label}
               className="text-left hover:!border-soul-bg hover:!bg-soul-bg hover:!text-soul-fg focus-visible:!bg-soul-bg focus-visible:!text-soul-fg"
-              onClick={() => onChoose(i)}
+              onClick={() => ready() && onChoose(i)}
             >
               [{i + 1}] {o.label}
             </Btn>

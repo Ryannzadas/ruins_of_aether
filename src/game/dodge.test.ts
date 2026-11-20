@@ -61,3 +61,30 @@ test.each(SPECTER_PATTERNS.map((p) => [p.name, p] as const))('%s spawns bullets 
 test('the specter has the three console patterns', () => {
   expect(SPECTER_PATTERNS.map((p) => p.name)).toEqual(['Rajada de Dados', 'Colapso de Éter', 'Pulso do Núcleo'])
 })
+
+test('Rajada de Dados hits a soul standing in a lane that is not the gap', () => {
+  const rajada = SPECTER_PATTERNS[0]
+  // rng 0 → a fresta fica nas primeiras faixas, longe do centro
+  let sim = startDodge(rajada, () => 0)
+  for (let i = 0; i < 300; i++) sim = stepDodge(sim, { dx: 0, dy: 0 }, 1 / 60)
+  expect(sim.hits).toBeGreaterThan(0)
+})
+
+test('the gap in Rajada de Dados is wide enough for the soul', () => {
+  const rajada = SPECTER_PATTERNS[0]
+  for (const r of [0, 0.3, 0.6, 0.99]) {
+    const ys = rajada.spawn(0, () => r).map((b) => b.y).sort((a, b) => a - b)
+    const edges = [0, ...ys, BOX]
+    const widest = Math.max(...edges.slice(1).map((y, i) => y - edges[i]))
+    // o vão entre dois projéteis (descontando os raios) cabe a alma com folga
+    expect(widest - 2 * 12).toBeGreaterThan(SOUL_RADIUS * 2 + 4)
+  }
+})
+
+test('Rajada de Dados has no safe spot between two full lanes', () => {
+  const rajada = SPECTER_PATTERNS[0]
+  const between = (4 + 0.5 + 0.5) * (BOX / 7) // fronteira entre as faixas 4 e 5
+  let sim: DodgeSim = { ...startDodge(rajada, () => 0), soul: { x: 120, y: between } }
+  for (let i = 0; i < 300; i++) sim = stepDodge(sim, { dx: 0, dy: 0 }, 1 / 60)
+  expect(sim.hits).toBeGreaterThan(0)
+})

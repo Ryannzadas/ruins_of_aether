@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { backingSize } from './canvasSize'
 import { BOX, SOUL_RADIUS, startDodge, stepDodge, type DodgeInput, type DodgeSim, type Pattern } from '@/game/dodge'
 
 const KEYS: Record<string, [number, number]> = {
@@ -81,7 +82,7 @@ export function DodgeBox({ pattern, onDone }: { pattern: Pattern; onDone: (hits:
     const draw = () => {
       if (!ctx) return
       const dpr = window.devicePixelRatio || 1
-      const size = canvas.clientWidth * dpr
+      const size = backingSize(canvas.clientWidth, dpr)
       if (canvas.width !== size) canvas.width = canvas.height = size
       const k = size / BOX
       ctx.setTransform(k, 0, 0, k, 0, 0)

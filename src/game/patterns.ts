@@ -10,12 +10,13 @@ const rajada: Pattern = {
   duration: 5,
   spawn(tick, rng) {
     if (tick % at(0.6) !== 0 || tick > at(4)) return []
-    const lanes = 6
-    const gap = Math.floor(rng() * lanes)
+    // 7 faixas com projéteis grandes: entre duas faixas cheias a alma não passa; só a fresta (2 faixas vizinhas) é segura.
+    const lanes = 7
+    const gap = Math.floor(rng() * (lanes - 1))
     const out: Bullet[] = []
     for (let i = 0; i < lanes; i++) {
-      if (i === gap || i === (gap + 1) % lanes) continue
-      out.push({ x: -8, y: (i + 0.5) * (BOX / lanes), vx: 120, vy: 0, r: 6 })
+      if (i === gap || i === gap + 1) continue
+      out.push({ x: -8, y: (i + 0.5) * (BOX / lanes), vx: 120, vy: 0, r: 12 })
     }
     return out
   },

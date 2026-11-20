@@ -13,9 +13,22 @@ type Screen = { kind: 'title' } | { kind: 'name' } | { kind: 'credits' } | { kin
 
 const CHAPTER_TITLES: Record<number, string> = { 1: 'A Torre Inicial' }
 
+/** O save só vale se ainda cabe no roteiro atual (rótulo e posição existem). Se não, é descartado. */
+function loadPlayableSave() {
+  const s = loadGame()
+  if (!s) return null
+  try {
+    current(CHAPTER_1, s.story)
+    return s
+  } catch {
+    clearSave()
+    return null
+  }
+}
+
 export function App() {
   const [screen, setScreen] = useState<Screen>({ kind: 'title' })
-  const [hasSave, setHasSave] = useState(() => loadGame() !== null)
+  const [hasSave, setHasSave] = useState(() => loadPlayableSave() !== null)
 
   const play = (player: Player, story: Story) => {
     saveGame({ player, story })
@@ -28,7 +41,7 @@ export function App() {
       <TitleScreen
         hasSave={hasSave}
         onContinue={() => {
-          const s = loadGame()
+          const s = loadPlayableSave()
           if (s) setScreen({ kind: 'play', player: s.player, story: s.story })
           else setHasSave(false)
         }}
@@ -60,7 +73,7 @@ export function App() {
           player={player}
           story={story}
           onTitle={() => {
-            setHasSave(loadGame() !== null)
+            setHasSave(loadPlayableSave() !== null)
             setScreen({ kind: 'title' })
           }}
         />

@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { App } from '@/App'
 import { saveGame } from '@/game/save'
@@ -6,6 +6,10 @@ import { newPlayer } from '@/game/player'
 import { newStory } from '@/story/runner'
 import { BattleScreen } from './BattleScreen'
 import { TOWER_SPECTER } from '@/game/enemies'
+import { SceneScreen } from './SceneScreen'
+
+/** Espera passar a trava contra toque duplo. */
+const armed = () => new Promise((r) => setTimeout(r, 450))
 
 vi.mock('./DodgeBox', () => ({
   DodgeBox: ({ onDone }: { onDone: (hits: number) => void }) => (
@@ -62,6 +66,7 @@ test('Enter advances narration but never picks a choice', async () => {
 test('clicking an option advances the scene', async () => {
   const user = await startNewGame()
   for (let i = 0; i < 5; i++) await user.click(screen.getByRole('button', { name: /continuar/i }))
+  await armed()
   await user.click(screen.getByRole('button', { name: /Me levantar e explorar/ }))
   expect(screen.getByText(/As pernas tremem/)).toBeInTheDocument()
 })
@@ -72,6 +77,7 @@ test('sparing the specter three times ends the fight as pacified', async () => {
   render(<BattleScreen player={newPlayer('Ana')} enemy={TOWER_SPECTER} onFinish={onFinish} />)
   await user.click(screen.getByRole('button', { name: /continuar/i }))
   for (let i = 0; i < 3; i++) {
+    await armed()
     await user.click(screen.getByRole('button', { name: 'Pacificar' }))
     await user.click(screen.getByRole('button', { name: /continuar/i }))
     if (i < 2) await user.click(screen.getByRole('button', { name: 'fim do ataque' }))
@@ -107,4 +113,32 @@ test('the chapter end says chapter 2 is coming', async () => {
   const end = await screen.findByRole('region', { name: /Capítulo 1 concluído/ })
   expect(within(end).getByText(/Capítulo 2 em breve/)).toBeInTheDocument()
   expect(within(end).getByRole('button', { name: /Voltar ao título/ })).toBeInTheDocument()
+})
+
+test('a double tap on Continuar does not pick the choice that appears under it', async () => {
+  const onChoose = vi.fn()
+  const step = { kind: 'choice' as const, prompt: 'E agora?', options: [{ label: 'A', goto: 'a' }, { label: 'B', goto: 'b' }] }
+  render(<SceneScreen step={step} player={newPlayer('Ana')} onNext={vi.fn()} onChoose={onChoose} />)
+  fireEvent.click(screen.getByRole('button', { name: /B/ }))
+  expect(onChoose).not.toHaveBeenCalled()
+  await armed()
+  fireEvent.click(screen.getByRole('button', { name: /B/ }))
+  expect(onChoose).toHaveBeenCalledWith(1)
+})
+
+test('a double tap on Continuar in a fight does not trigger an action', async () => {
+  render(<BattleScreen player={newPlayer('Ana')} enemy={TOWER_SPECTER} onFinish={vi.fn()} />)
+  fireEvent.click(screen.getByRole('button', { name: /continuar/i }))
+  fireEvent.click(screen.getByRole('button', { name: 'Pacificar' }))
+  expect(screen.getByLabelText('Humanidade')).toHaveTextContent('50')
+  await armed()
+  fireEvent.click(screen.getByRole('button', { name: 'Pacificar' }))
+  expect(screen.getByLabelText('Humanidade')).toHaveTextContent('58')
+})
+
+test('a save that no longer fits the story is dropped instead of crashing', async () => {
+  saveGame({ player: newPlayer('Ana'), story: { ...newStory(1), cursor: { label: 'capitulo-que-sumiu', index: 3 } } })
+  render(<App />)
+  expect(screen.queryByRole('button', { name: 'Continuar' })).not.toBeInTheDocument()
+  expect(localStorage.getItem('ruins-of-aether:save')).toBeNull()
 })
