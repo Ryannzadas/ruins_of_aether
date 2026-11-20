@@ -5,7 +5,7 @@ import type { Player } from '@/game/player'
 import { DodgeBox } from './DodgeBox'
 import { Hud } from './Hud'
 import { Btn, Frame, NextButton } from './kit'
-import { SPECTER_PORTRAIT } from './portraits'
+import { SPECTER_PORTRAIT } from '@/game/portraits'
 import { useTapGuard } from './useTapGuard'
 
 type Phase = 'intro' | 'menu' | 'result' | 'dodge' | 'hit' | 'outcome'

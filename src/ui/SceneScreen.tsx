@@ -3,7 +3,7 @@ import type { Player } from '@/game/player'
 import { fillName } from '@/story/runner'
 import type { VisibleStep } from '@/story/types'
 import { Btn, Frame, NextButton } from './kit'
-import { KAEL_PORTRAIT } from './portraits'
+import { KAEL_PORTRAIT } from '@/game/portraits'
 import { useTapGuard } from './useTapGuard'
 import { useTypewriter } from './useTypewriter'
 
