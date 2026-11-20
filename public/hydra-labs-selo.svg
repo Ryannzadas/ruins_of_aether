@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="196" height="28" viewBox="0 0 196 28" role="img" aria-label="Desenvolvido por Hydra Labs">
+  <title>Desenvolvido por Hydra Labs</title>
+  <rect x="0.5" y="0.5" width="195" height="27" rx="13.5" fill="#110d1c" stroke="#2e2546"/>
+  <svg x="8" y="5" width="18" height="18" viewBox="386 386 1160 1160">
+    <rect x="530" y="483" width="292" height="964" rx="146" fill="#8b5cf6"/>
+    <rect x="1110" y="483" width="292" height="964" rx="146" fill="#8b5cf6"/>
+    <g id="h"><path d="M822 947 V1003 C700 995 565 1040 530 1150 V1140 C560 1000 680 947 820 947 Z" fill="#6d28d9"/><path d="M530 1060 C534 1010 556 975 580 950 L720 810 C748 782 780 772 820 772 H965 L853 947 H820 C680 947 560 1000 530 1140 Z" fill="#e9d5ff"/><path d="M965 772 L1077 947 H853 Z" fill="#c4b5fd"/></g>
+    <use href="#h" transform="rotate(180 966 966)"/>
+  </svg>
+  <text x="33" y="18" font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif" font-size="11"><tspan fill="#a49cbc">Desenvolvido por</tspan><tspan fill="#ffffff" font-weight="700" dx="4">Hydra Labs</tspan></text>
+</svg>
