@@ -24,6 +24,10 @@ export type Step =
   | { kind: 'when'; flag: string; equals: FlagValue; goto: string }
   | { kind: 'set'; flags: Flags }
   | { kind: 'note'; who: 'kael' | 'lyra'; text: string }
+  /** Muda a Humanidade do jogador (o App aplica). */
+  | { kind: 'humanity'; delta: number }
+  /** Pula se a Humanidade (já contando o que falta aplicar) estiver na faixa. */
+  | { kind: 'whenHumanity'; min?: number; max?: number; goto: string }
 
 export type VisibleStep = Extract<Step, { kind: 'title' | 'narration' | 'line' | 'glitch' | 'thought' | 'file' | 'choice' | 'battle' | 'end' }>
 
@@ -40,4 +44,6 @@ export type Story = {
   lyraNotes: string[]
   killed: number
   pacified: number
+  /** Humanidade mudada pelo roteiro e ainda não aplicada ao jogador. Saves antigos não têm. */
+  humanityShift?: number
 }
