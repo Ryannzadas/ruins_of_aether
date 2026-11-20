@@ -13,7 +13,7 @@ export type Step =
   /** Fala do ERRO-7 "sem perceber": voz de máquina. */
   | { kind: 'glitch'; text: string }
   /** Pensamento: verde se mais humano, vermelho se mais máquina. */
-  | { kind: 'thought'; text: string }
+  | { kind: 'thought'; text: string; voice?: 'machine' | 'human' }
   /** Bloco de arquivo/terminal, mostrado em fonte fixa. */
   | { kind: 'file'; text: string }
   | { kind: 'choice'; prompt: string; options: { label: string; set?: Flags; goto: string }[] }
