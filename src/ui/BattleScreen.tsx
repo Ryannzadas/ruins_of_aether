@@ -6,6 +6,7 @@ import { DodgeBox } from './DodgeBox'
 import { Hud } from './Hud'
 import { Btn, Frame, NextButton } from './kit'
 import { SPECTER_PORTRAIT } from './portraits'
+import { useTapGuard } from './useTapGuard'
 
 type Phase = 'intro' | 'menu' | 'result' | 'dodge' | 'hit' | 'outcome'
 
@@ -16,6 +17,7 @@ export function BattleScreen({ player: initial, enemy, onFinish }: { player: Pla
   const [phase, setPhase] = useState<Phase>('intro')
   const [log, setLog] = useState<string[]>(enemy.preBattle.map((l) => `“${l}”`))
   const [warning, setWarning] = useState<string | null>(null)
+  const ready = useTapGuard(phase)
 
   const act = (a: Action) => {
     const r = playerAction(player, battle, a, Math.random)
@@ -122,13 +124,13 @@ export function BattleScreen({ player: initial, enemy, onFinish }: { player: Pla
       {phase === 'menu' ? (
         <div className="flex flex-col gap-2">
           <div className="grid grid-cols-3 gap-2.5">
-            <Btn tone="danger" className="!px-2 text-center text-sm sm:text-base" onClick={() => act('attack')}>
+            <Btn tone="danger" className="!px-2 text-center text-sm sm:text-base" onClick={() => ready() && act('attack')}>
               Atacar
             </Btn>
-            <Btn tone="glow" className="!px-2 text-center text-sm sm:text-base" onClick={() => act('magic')} disabled={player.mp < MAGIC_COST}>
+            <Btn tone="glow" className="!px-2 text-center text-sm sm:text-base" onClick={() => ready() && act('magic')} disabled={player.mp < MAGIC_COST}>
               Magia
             </Btn>
-            <Btn tone="soul" className="!px-2 text-center text-sm sm:text-base" onClick={() => act('pacify')}>
+            <Btn tone="soul" className="!px-2 text-center text-sm sm:text-base" onClick={() => ready() && act('pacify')}>
               Pacificar
             </Btn>
           </div>

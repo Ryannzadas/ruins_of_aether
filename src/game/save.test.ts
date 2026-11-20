@@ -18,6 +18,13 @@ test('broken or old saves are ignored', () => {
   expect(loadGame()).toBeNull()
   localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, player: null }))
   expect(loadGame()).toBeNull()
+  const { flags: _f, ...noFlags } = data.story
+  localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, player: data.player, story: noFlags }))
+  expect(loadGame()).toBeNull()
+  localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, player: { ...data.player, name: 7 }, story: data.story }))
+  expect(loadGame()).toBeNull()
+  localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, player: data.player, story: { ...data.story, kaelLogs: 'x' } }))
+  expect(loadGame()).toBeNull()
 })
 
 test('a blocked storage does not crash the game', () => {
