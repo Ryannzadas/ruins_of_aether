@@ -1,5 +1,5 @@
 import { enemyHits, playerAction, startBattle } from './battle'
-import { TOWER_SPECTER } from './enemies'
+import { CITY_CORRUPTED, LESSER_AVATAR, MORS_AVATAR, SHADOW_GUARDIAN, THE_REMNANT, TOWER_SPECTER } from './enemies'
 import { newPlayer } from './player'
 
 const rng = () => 0.5
@@ -66,4 +66,36 @@ test('reaching 0 hp is a defeat', () => {
   const r = enemyHits({ ...newPlayer('a'), hp: 2 }, startBattle(TOWER_SPECTER), 1)
   expect(r.player.hp).toBe(0)
   expect(r.battle.outcome).toBe('defeat')
+})
+
+describe('the other enemies keep the console numbers', () => {
+  test.each([
+    [SHADOW_GUARDIAN, 'Guardião das Sombras', 55, 8, 3, 75, 4],
+    [CITY_CORRUPTED, 'Corrompido da Cidade', 65, 9, 4, 90, 3],
+    [LESSER_AVATAR, 'Avatar Menor de Mors', 70, 9, 4, 80, 3],
+    [THE_REMNANT, 'O Remanescente', 50, 7, 2, 100, 3],
+    [MORS_AVATAR, 'Avatar de Mors', 80, 10, 5, 0, 5],
+  ] as const)('%s', (e, name, hp, atk, def, exp, mercy) => {
+    expect(e).toMatchObject({ name, maxHp: hp, attack: atk, defense: def, expReward: exp, mercyThreshold: mercy, canPacify: true })
+    expect(e.patterns.length).toBeGreaterThanOrEqual(2)
+    expect(e.portrait.length).toBeGreaterThan(0)
+  })
+})
+
+test('the final boss gives no experience', () => {
+  let p = newPlayer('a')
+  let b = startBattle(MORS_AVATAR)
+  for (let i = 0; i < 5; i++) ({ player: p, battle: b } = playerAction(p, b, 'pacify', rng))
+  expect(b.outcome).toBe('pacified')
+  expect(p.exp).toBe(0)
+  expect(MORS_AVATAR.givesExp).toBe(false)
+})
+
+test('winning tells how much experience was gained and the new level', () => {
+  let p = newPlayer('a')
+  let b = startBattle(TOWER_SPECTER)
+  let log: string[] = []
+  for (let i = 0; i < 3; i++) ({ player: p, battle: b, log } = playerAction(p, b, 'pacify', rng))
+  expect(log).toContain('+50 XP')
+  expect(log).toContain('EVOLUÇÃO DE SISTEMA — Nível 2')
 })

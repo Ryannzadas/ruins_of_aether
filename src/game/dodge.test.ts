@@ -1,5 +1,5 @@
 import { BOX, SOUL_RADIUS, SOUL_SPEED, startDodge, stepDodge, type DodgeSim, type Pattern } from './dodge'
-import { SPECTER_PATTERNS } from './patterns'
+import { ESPIRAL, GRADE, LAGRIMAS, LAMINAS, SPECTER_PATTERNS } from './patterns'
 
 const quiet: Pattern = { id: 'quiet', name: 'Silêncio', duration: 5, spawn: () => [] }
 const rng = () => 0.5
@@ -87,4 +87,27 @@ test('Rajada de Dados has no safe spot between two full lanes', () => {
   let sim: DodgeSim = { ...startDodge(rajada, () => 0), soul: { x: 120, y: between } }
   for (let i = 0; i < 300; i++) sim = stepDodge(sim, { dx: 0, dy: 0 }, 1 / 60)
   expect(sim.hits).toBeGreaterThan(0)
+})
+
+test.each([ESPIRAL, LAMINAS, LAGRIMAS, GRADE].map((p) => [p.name, p] as const))('new pattern %s spawns bullets and ends on time', (_n, pattern) => {
+  let sim = startDodge(pattern, rng)
+  for (let i = 0; i < Math.round((pattern.duration - 0.1) * 60); i++) sim = stepDodge(sim, { dx: 0, dy: 0 }, 1 / 60)
+  expect(sim.done).toBe(false)
+  expect(sim.spawned).toBeGreaterThan(0)
+  for (let i = 0; i < 12; i++) sim = stepDodge(sim, { dx: 0, dy: 0 }, 1 / 60)
+  expect(sim.done).toBe(true)
+})
+
+test('every new pattern can hit a soul that never moves', () => {
+  for (const pattern of [ESPIRAL, LAMINAS, LAGRIMAS, GRADE]) {
+    let hits = 0
+    for (const seed of [1, 2, 3]) {
+      let x = seed
+      const lcg = () => ((x = (x * 1103515245 + 12345) % 2147483648) / 2147483648)
+      let sim = startDodge(pattern, lcg)
+      while (!sim.done) sim = stepDodge(sim, { dx: 0, dy: 0 }, 1 / 60)
+      hits += sim.hits
+    }
+    expect(hits, pattern.name).toBeGreaterThan(0)
+  }
 })
