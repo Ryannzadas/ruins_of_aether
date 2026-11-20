@@ -91,7 +91,7 @@ export function SceneScreen({ step, player, onNext, onChoose }: { step: SceneSte
       </p>
     )
   } else if (step.kind === 'thought') {
-    body = <p className={`text-lg italic leading-relaxed ${player.humanity >= 50 ? 'text-soul-fg' : 'text-danger'}`}>« {shown} »</p>
+    body = <p className={`text-lg italic leading-relaxed ${(step.voice ?? (player.humanity >= 50 ? 'human' : 'machine')) === 'human' ? 'text-soul-fg' : 'text-danger'}`}>« {shown} »</p>
   } else if (step.kind === 'file') {
     body = (
       <pre className="overflow-x-auto whitespace-pre text-[11px] leading-snug text-amber-glow glow sm:text-sm" aria-label="Arquivo">

@@ -173,13 +173,13 @@ export const CHAPTER_1: Script = {
     { kind: 'goto', to: 'espectro' },
   ],
   fim_paz: [
-    { kind: 'set', flags: { specter_result: 'pacified' } },
+    { kind: 'set', flags: { specter_result: 'pacified', specter_pacified: true } },
     { kind: 'line', speaker: 'Kael', text: 'Você o alcançou. Vi isso uma vez, há séculos.' },
     { kind: 'line', speaker: 'Kael', text: 'Compaixão... em algo que deveria ser só código.' },
     { kind: 'goto', to: 'conclusao' },
   ],
   fim_luta: [
-    { kind: 'set', flags: { specter_result: 'victory' } },
+    { kind: 'set', flags: { specter_result: 'victory', specter_defeated: true } },
     { kind: 'line', speaker: 'Kael', text: 'Você sobreviveu. Eficiente.' },
     { kind: 'line', speaker: 'Kael', text: 'Mas o que você destruiu... era humano, antes.' },
     { kind: 'goto', to: 'conclusao' },
@@ -197,6 +197,7 @@ export const CHAPTER_1: Script = {
     { kind: 'note', who: 'lyra', text: 'Referência a ERRO-7 encontrada nos registros da Torre-N1.' },
     { kind: 'thought', text: 'ERRO-7... por que esse nome parece... meu?' },
     { kind: 'narration', text: 'Algo está errado. Você sente — não sabe o quê ainda. Mas a Torre observa. E Kael observa você.' },
+    { kind: 'set', flags: { chapter1_complete: true } },
     { kind: 'end', chapter: 1 },
   ],
 }
