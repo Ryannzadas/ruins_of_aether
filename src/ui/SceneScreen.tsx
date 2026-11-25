@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
 import type { Player } from '@/game/player'
 import { fillName } from '@/story/runner'
-import type { VisibleStep } from '@/story/types'
+import type { Speaker, VisibleStep } from '@/story/types'
 import { Btn, Frame, NextButton } from './kit'
-import { KAEL_PORTRAIT } from '@/game/portraits'
+import { KAEL_PORTRAIT, LYRA_PORTRAIT, MORS_PORTRAIT } from './portraits'
 import { useTapGuard } from './useTapGuard'
 import { useTypewriter } from './useTypewriter'
 
@@ -15,6 +15,12 @@ const speakerColor: Record<string, string> = {
   Lyra: 'text-amber-glow',
   Mors: 'text-danger',
   Sistema: 'text-amber-glow',
+}
+
+const speakerPortrait: Partial<Record<Speaker, { art: string; className: string }>> = {
+  Kael: { art: KAEL_PORTRAIT, className: 'text-[#e39a3a] [text-shadow:0_0_6px_rgb(255_160_50_/_0.6)]' },
+  Lyra: { art: LYRA_PORTRAIT, className: 'text-amber-glow [text-shadow:0_0_6px_rgb(255_212_128_/_0.5)]' },
+  Mors: { art: MORS_PORTRAIT, className: 'text-danger [text-shadow:0_0_6px_rgb(255_106_61_/_0.6)]' },
 }
 
 function textOf(step: SceneStep): string {
@@ -75,7 +81,7 @@ export function SceneScreen({ step, player, onNext, onChoose }: { step: SceneSte
     )
   }
 
-  const showPortrait = step.kind === 'line' && step.speaker === 'Kael'
+  const portrait = step.kind === 'line' ? speakerPortrait[step.speaker] : undefined
   let body
   if (step.kind === 'line') {
     body = (
@@ -107,9 +113,9 @@ export function SceneScreen({ step, player, onNext, onChoose }: { step: SceneSte
   return (
     <Frame className="flex min-h-[60vh] flex-col gap-6" onClick={step.kind === 'choice' ? undefined : proceed}>
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-        {showPortrait && (
-          <pre aria-hidden="true" className="shrink-0 text-[8px] leading-[8px] text-[#e39a3a] [text-shadow:0_0_6px_rgb(255_160_50_/_0.6)] sm:text-[9px] sm:leading-[9px]">
-            {KAEL_PORTRAIT}
+        {portrait && (
+          <pre aria-hidden="true" className={`shrink-0 text-[8px] leading-[8px] sm:text-[9px] sm:leading-[9px] ${portrait.className}`}>
+            {portrait.art}
           </pre>
         )}
         <div className="min-w-0 flex-1">{body}</div>
