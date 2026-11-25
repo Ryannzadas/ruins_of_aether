@@ -1,13 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { backingSize } from './canvasSize'
+import { heldKeys } from './dodgeKeys'
 import { BOX, SOUL_RADIUS, startDodge, stepDodge, type DodgeInput, type DodgeSim, type Pattern } from '@/game/dodge'
-
-const KEYS: Record<string, [number, number]> = {
-  ArrowLeft: [-1, 0], a: [-1, 0], A: [-1, 0],
-  ArrowRight: [1, 0], d: [1, 0], D: [1, 0],
-  ArrowUp: [0, -1], w: [0, -1], W: [0, -1],
-  ArrowDown: [0, 1], s: [0, 1], S: [0, 1],
-}
 
 /**
  * A caixa de desvio. A simulação é `stepDodge`; aqui só entram teclado/toque e o desenho.
@@ -23,7 +17,7 @@ export function DodgeBox({ pattern, onDone }: { pattern: Pattern; onDone: (hits:
     // No celular a caixa pode estar fora da tela: traz para o meio antes do ataque.
     canvas.scrollIntoView?.({ block: 'center', behavior: 'smooth' })
     const ctx = canvas.getContext('2d')
-    const held = new Set<string>()
+    const keys = heldKeys()
     let target: { x: number; y: number } | null = null
     let sim: DodgeSim = startDodge(pattern, Math.random)
     let last = performance.now()
@@ -52,13 +46,10 @@ export function DodgeBox({ pattern, onDone }: { pattern: Pattern; onDone: (hits:
       anchor = null
     }
     const onKeyDown = (e: KeyboardEvent) => {
-      if (KEYS[e.key]) {
-        e.preventDefault()
-        target = null
-        held.add(e.key)
-      }
+      if (keys.keyDown(e)) target = null
     }
-    const onKeyUp = (e: KeyboardEvent) => held.delete(e.key)
+    const onKeyUp = (e: KeyboardEvent) => keys.keyUp(e)
+    const onBlur = () => keys.blur()
     const onVisibility = () => (last = performance.now())
 
     canvas.addEventListener('pointerdown', onDown)
@@ -66,17 +57,12 @@ export function DodgeBox({ pattern, onDone }: { pattern: Pattern; onDone: (hits:
     window.addEventListener('pointerup', onUp)
     window.addEventListener('keydown', onKeyDown)
     window.addEventListener('keyup', onKeyUp)
+    window.addEventListener('blur', onBlur)
     document.addEventListener('visibilitychange', onVisibility)
 
     const input = (): DodgeInput => {
       if (target) return { target }
-      let dx = 0
-      let dy = 0
-      for (const k of held) {
-        dx += KEYS[k][0]
-        dy += KEYS[k][1]
-      }
-      return { dx: Math.sign(dx), dy: Math.sign(dy) }
+      return keys.dir()
     }
 
     const draw = () => {
@@ -139,6 +125,7 @@ export function DodgeBox({ pattern, onDone }: { pattern: Pattern; onDone: (hits:
       window.removeEventListener('pointerup', onUp)
       window.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('keyup', onKeyUp)
+      window.removeEventListener('blur', onBlur)
       document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [pattern])
