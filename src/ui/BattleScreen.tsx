@@ -5,10 +5,9 @@ import type { Player } from '@/game/player'
 import { DodgeBox } from './DodgeBox'
 import { Hud } from './Hud'
 import { Btn, Frame, NextButton } from './kit'
-import { SPECTER_PORTRAIT } from '@/game/portraits'
 import { useTapGuard } from './useTapGuard'
 
-type Phase = 'intro' | 'menu' | 'result' | 'dodge' | 'hit' | 'outcome'
+type Phase = 'intro' | 'menu' | 'result' | 'dodge' | 'hit'
 
 /** Uma luta: menu de ações ↔ caixa de desvio, até vencer, pacificar ou cair. */
 export function BattleScreen({ player: initial, enemy, onFinish }: { player: Player; enemy: EnemyDef; onFinish: (o: Outcome, p: Player) => void }) {
@@ -32,7 +31,7 @@ export function BattleScreen({ player: initial, enemy, onFinish }: { player: Pla
     setPhase('result')
   }
 
-  const afterResult = () => setPhase(battle.outcome ? 'outcome' : 'dodge')
+  const afterResult = () => (battle.outcome ? onFinish(battle.outcome, player) : setPhase('dodge'))
 
   const afterDodge = (hits: number) => {
     const r = enemyHits(player, battle, hits)
@@ -43,17 +42,14 @@ export function BattleScreen({ player: initial, enemy, onFinish }: { player: Pla
   }
 
   const afterHit = () => {
-    if (battle.outcome === 'defeat') {
-      setLog(['Sistemas críticos falharam...'])
-      setPhase('outcome')
-    } else setPhase('menu')
+    if (battle.outcome === 'defeat') onFinish('defeat', player)
+    else setPhase('menu')
   }
 
   const next = () => {
     if (phase === 'intro') setPhase('menu')
     else if (phase === 'result') afterResult()
     else if (phase === 'hit') afterHit()
-    else if (phase === 'outcome') onFinish(battle.outcome!, player)
   }
 
   // Teclado: Enter/espaço continua; 1, 2, 3 escolhem a ação.
@@ -109,7 +105,7 @@ export function BattleScreen({ player: initial, enemy, onFinish }: { player: Pla
         ) : (
           <>
             <pre aria-hidden="true" className="text-[9px] leading-[9px] text-amber-dim opacity-80 sm:text-[10px] sm:leading-[10px]">
-              {SPECTER_PORTRAIT}
+              {enemy.portrait}
             </pre>
             <div className="flex w-full flex-col gap-2" aria-live="polite">
               {phase === 'menu' && battle.turn > 0 && <p className="text-amber-hi">“{taunt}”</p>}

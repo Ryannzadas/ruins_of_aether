@@ -1,5 +1,6 @@
 import { useId, useState } from 'react'
 import type { Player } from '@/game/player'
+import { CHAPTER_TITLES, ENDING_TITLES, LAST_CHAPTER } from '@/story'
 import { NAME_MAX } from '@/story/runner'
 import type { Story } from '@/story/types'
 import { Btn, Frame } from './kit'
@@ -79,8 +80,83 @@ export function NameScreen({ onSubmit, onBack }: { onSubmit: (raw: string) => vo
   )
 }
 
-export function ChapterEnd({ chapter, title, player, story, onTitle }: { chapter: number; title: string; player: Player; story: Story; onTitle: () => void }) {
-  const fate = story.flags.specter_result === 'pacified' ? 'Você alcançou o Espectro. Ele se foi em paz.' : 'Você destruiu o Espectro. Ele era humano, antes.'
+function chapterFate(chapter: number, story: Story): string {
+  switch (chapter) {
+    case 1:
+      return story.flags.specter_result === 'pacified'
+        ? 'Você alcançou o Espectro. Ele se foi em paz.'
+        : 'Você destruiu o Espectro. Ele era humano, antes.'
+    case 2:
+      return story.flags.shadow_result === 'pacified'
+        ? 'O Guardião das Sombras baixou a arma e descansou.'
+        : 'O Guardião das Sombras tombou nas ruínas.'
+    case 3:
+      return 'A parede de nomes e a confissão de Kael revelaram a natureza da Torre.'
+    case 4:
+      return story.flags.remnant_result === 'pacified'
+        ? 'O último humano puro encontrou paz antes da subida final.'
+        : 'O caminho até o núcleo de MORS está aberto.'
+    default:
+      return ''
+  }
+}
+
+export function ChapterEnd({
+  chapter,
+  title,
+  player,
+  story,
+  onNextChapter,
+  onCredits,
+  onTitle,
+}: {
+  chapter: number
+  title: string
+  player: Player
+  story: Story
+  onNextChapter?: () => void
+  onCredits?: () => void
+  onTitle: () => void
+}) {
+  if (chapter >= LAST_CHAPTER) {
+    const endingKey = String(story.flags.ending ?? 'fusion')
+    const endingTitle = ENDING_TITLES[endingKey] ?? 'Fusão'
+    const knowsTruth = Boolean(story.flags.knows_true_function || story.flags.found_erro7_file)
+    return (
+      <Frame className="mx-auto flex w-full max-w-xl flex-col gap-6 text-center" aria-label={`Capítulo ${chapter} concluído — Final: ${endingTitle}`}>
+        <p className="text-sm tracking-[0.4em] text-amber-dim">HISTÓRIA COMPLETA · FINAL</p>
+        <h2 className="font-display glow text-5xl text-amber-glow">Final: {endingTitle}</h2>
+        <div className="flex flex-col gap-2 border border-line p-4 text-amber">
+          <p>
+            Humanidade: <span className={player.humanity >= 50 ? 'text-soul-fg' : 'text-danger'}>{player.humanity}%</span> · Nível {player.level}
+          </p>
+          <p>
+            Inimigos pacificados: <span className="text-soul-fg">{story.pacified}</span> · Derrotados: <span className="text-danger">{story.killed}</span>
+          </p>
+          <p>
+            Verdade descoberta: <span className="text-amber-hi">{knowsTruth ? 'Sim (ERRO-7)' : 'Parcial'}</span>
+          </p>
+        </div>
+        <p className="whitespace-pre-line text-amber-hi">
+          {'Jogue novamente. As pistas estão em todo lugar.\nNa primeira vez, você suspeita.\nNa segunda, você vê.\nNa terceira, você entende.'}
+        </p>
+        <div className="flex flex-col gap-2.5">
+          {onCredits && (
+            <Btn tone="soul" className="text-center" onClick={onCredits}>
+              Créditos
+            </Btn>
+          )}
+          <Btn className="text-center" onClick={onTitle}>
+            Voltar ao título
+          </Btn>
+        </div>
+      </Frame>
+    )
+  }
+
+  const fate = chapterFate(chapter, story)
+  const nextChapter = chapter + 1
+  const nextTitle = CHAPTER_TITLES[nextChapter]
   const label = `Capítulo ${chapter} concluído — ${title}`
   return (
     <Frame className="mx-auto flex w-full max-w-xl flex-col gap-6 text-center" aria-label={label}>
@@ -90,10 +166,17 @@ export function ChapterEnd({ chapter, title, player, story, onTitle }: { chapter
       <p className="text-amber">
         Humanidade: <span className={player.humanity >= 50 ? 'text-soul-fg' : 'text-danger'}>{player.humanity}%</span> · Nível {player.level}
       </p>
-      <p className="border border-line p-4 text-amber-hi">Capítulo 2 em breve: Os Arquivos de Lyra.</p>
-      <Btn className="text-center" onClick={onTitle}>
-        Voltar ao título
-      </Btn>
+      {nextTitle && <p className="border border-line p-4 text-amber-hi">Próximo capítulo: {nextTitle}</p>}
+      <div className="flex flex-col gap-2.5">
+        {onNextChapter && (
+          <Btn tone="soul" className="text-center" onClick={onNextChapter}>
+            Continuar para o Capítulo {nextChapter}
+          </Btn>
+        )}
+        <Btn className="text-center" onClick={onTitle}>
+          Voltar ao título
+        </Btn>
+      </div>
     </Frame>
   )
 }
