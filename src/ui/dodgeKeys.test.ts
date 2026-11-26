@@ -32,3 +32,14 @@ test('space is swallowed during dodge without changing direction', () => {
   expect(space.preventDefault).toHaveBeenCalled()
   expect(keys.dir()).toEqual({ dx: 0, dy: 0 })
 })
+
+test('a letter pressed without Shift and released with Shift (or Caps Lock) is let go', () => {
+  const keys = heldKeys()
+  keys.keyDown(evt('a'))
+  keys.keyUp({ key: 'A' })
+  expect(keys.dir()).toEqual({ dx: 0, dy: 0 })
+
+  keys.keyDown(evt('D'))
+  keys.keyUp({ key: 'd' })
+  expect(keys.dir()).toEqual({ dx: 0, dy: 0 })
+})
