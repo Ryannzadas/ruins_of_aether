@@ -2,17 +2,16 @@
 const KEYS: Record<string, [number, number]> = {
   ArrowLeft: [-1, 0],
   a: [-1, 0],
-  A: [-1, 0],
   ArrowRight: [1, 0],
   d: [1, 0],
-  D: [1, 0],
   ArrowUp: [0, -1],
   w: [0, -1],
-  W: [0, -1],
   ArrowDown: [0, 1],
   s: [0, 1],
-  S: [0, 1],
 }
+
+/** 'A' e 'a' são a mesma tecla: com Shift ou Caps Lock o soltar chega em maiúscula. */
+const norm = (key: string) => (key.length === 1 ? key.toLowerCase() : key)
 
 export type KeyEventLike = { key: string; preventDefault: () => void }
 
@@ -20,9 +19,10 @@ export function heldKeys() {
   const held = new Set<string>()
   return {
     keyDown(e: KeyEventLike): boolean {
-      if (KEYS[e.key]) {
+      const k = norm(e.key)
+      if (KEYS[k]) {
         e.preventDefault()
-        held.add(e.key)
+        held.add(k)
         return true
       }
       if (e.key === ' ') {
@@ -31,7 +31,7 @@ export function heldKeys() {
       return false
     },
     keyUp(e: { key: string }) {
-      held.delete(e.key)
+      held.delete(norm(e.key))
     },
     blur() {
       held.clear()
