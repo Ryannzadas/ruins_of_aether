@@ -12,7 +12,7 @@ O twist se revela gradualmente ao longo de 5 capítulos. Na primeira jogada, alg
 
 ## Jogar no navegador
 
-**Status:** o Capítulo 1 já está na versão web. Os capítulos 2 a 5 e os finais ainda só existem na versão de console.
+**Status:** o jogo completo — todos os 5 capítulos e os 3 finais — está disponível na versão web e na versão de console.
 
 - **PC:** setas ou WASD para desviar; Enter/espaço avança; 1, 2 e 3 escolhem opções e ações.
 - **Celular:** toque para avançar; arraste o dedo em qualquer lugar da caixa para mover a alma.
@@ -52,13 +52,13 @@ Use as **setas ↑↓** para navegar nos menus e **Enter** para confirmar.
 
 ## Capítulos
 
-| # | Título              | Onde jogar        |
-|---|---------------------|-------------------|
+| # | Título              | Onde jogar          |
+|---|---------------------|---------------------|
 | 1 | A Torre Inicial     | Navegador e console |
-| 2 | Os Arquivos de Lyra | Console           |
-| 3 | O Éter Corrompido   | Console           |
-| 4 | Ecos de Mors        | Console           |
-| 5 | O Topo da Torre     | Console           |
+| 2 | Os Arquivos de Lyra | Navegador e console |
+| 3 | O Éter Corrompido   | Navegador e console |
+| 4 | Ecos de Mors        | Navegador e console |
+| 5 | O Topo da Torre     | Navegador e console |
 
 ## Personagens
 

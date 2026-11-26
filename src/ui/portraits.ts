@@ -1,27 +1,9 @@
-/** Retratos em caracteres (direção visual A). */
-export const KAEL_PORTRAIT = String.raw`       .:;;;;;;:.
-     .;%%%%%%%%%%%;.
-    ;%%#*:....:*#%%;
-   ;%#*.  .::.  .*#%;
-   %#*  .;%%%%;.  *#%
-   %#: .%@:  :@%. :#%
-   %#: .%@0101@%. :#%
-   %#*   ':%%:'   *#%
-   ;%#*.  .--.  .*#%;
-    ;%%#*:.__.:*#%%;
-     ';%%%%%%%%%%;'
-    .;%#*:;;;;;:*#%;.
-  .;%%#*        *#%%;.
- ;%%%#*          *#%%%;`
-
-export const SPECTER_PORTRAIT = String.raw`      . ' . : . ' .
-   '  .:;%%%%%%;:.  '
-    .;%%:'    ':%%;.
-   :%%:  0    0  :%%:
-   %%:     ..     :%%
-   :%%.  '----'  .%%:
-    ':%%;. .. .;%%:'
-   .  ':;%%%%%%;:'  .
-  ' . : %%:  :%% : . '
-     .  %:    :%  .
-   '   .:      :.   '`
+export {
+  CORRUPTED_PORTRAIT,
+  GUARDIAN_PORTRAIT,
+  KAEL_PORTRAIT,
+  LYRA_PORTRAIT,
+  MORS_PORTRAIT,
+  REMNANT_PORTRAIT,
+  SPECTER_PORTRAIT,
+} from '@/game/portraits'
