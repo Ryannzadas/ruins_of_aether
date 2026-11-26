@@ -53,8 +53,14 @@ export function playerAction(
   } else if (battle.enemyHp <= 0) {
     battle = { ...battle, outcome: 'victory' }
     log.push(e.onDefeat)
+    if (e.humanCorrupted) log.push('O corpo desintegra em fluxos de dados. Um nome aparece e some.')
   }
-  if (battle.outcome) player = gainExp(player, e.expReward).player
+  if (battle.outcome && e.givesExp) {
+    const r = gainExp(player, e.expReward)
+    player = r.player
+    log.push(`+${e.expReward} XP`)
+    for (let lv = player.level - r.levelsGained + 1; lv <= player.level; lv++) log.push(`EVOLUÇÃO DE SISTEMA — Nível ${lv}`)
+  }
   return { player, battle, log, usedTurn: true }
 }
 

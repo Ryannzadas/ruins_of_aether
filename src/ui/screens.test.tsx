@@ -79,9 +79,11 @@ test('sparing the specter three times ends the fight as pacified', async () => {
   for (let i = 0; i < 3; i++) {
     await armed()
     await user.click(screen.getByRole('button', { name: 'Pacificar' }))
-    await user.click(screen.getByRole('button', { name: /continuar/i }))
-    if (i < 2) await user.click(screen.getByRole('button', { name: 'fim do ataque' }))
-    if (i < 2) await user.click(screen.getByRole('button', { name: /continuar/i }))
+    if (i < 2) {
+      await user.click(screen.getByRole('button', { name: /continuar/i }))
+      await user.click(screen.getByRole('button', { name: 'fim do ataque' }))
+      await user.click(screen.getByRole('button', { name: /continuar/i }))
+    }
   }
   expect(screen.getByLabelText('Humanidade')).toHaveTextContent('74')
   await user.click(screen.getByRole('button', { name: /continuar/i }))
@@ -105,14 +107,59 @@ test('credits carry the Hydra Labs badge', async () => {
   expect(img.closest('a')).toHaveAttribute('href', 'https://hydra-labs-studio.vercel.app')
 })
 
-test('the chapter end says chapter 2 is coming', async () => {
-  const story = { ...newStory(1), cursor: { label: 'conclusao', index: 11 } }
+test('chapter 1 end chains directly into chapter 2', async () => {
+  const story = { ...newStory(1), cursor: { label: 'conclusao', index: 12 } }
   saveGame({ player: newPlayer('Ana'), story })
   render(<App />)
   await userEvent.click(screen.getByRole('button', { name: 'Continuar' }))
   const end = await screen.findByRole('region', { name: /Capítulo 1 concluído/ })
-  expect(within(end).getByText(/Capítulo 2 em breve/)).toBeInTheDocument()
+  const nextBtn = within(end).getByRole('button', { name: /Continuar para o Capítulo 2/ })
+  await userEvent.click(nextBtn)
+  expect(await screen.findByRole('heading', { name: 'Os Arquivos de Lyra' })).toBeInTheDocument()
+  expect(JSON.parse(localStorage.getItem('ruins-of-aether:save')!).story.chapter).toBe(2)
+})
+
+test('chapter 5 end shows the reached ending and final statistics', async () => {
+  const story = {
+    ...newStory(5),
+    cursor: { label: 'fim_destruicao', index: 9 },
+    flags: { ending: 'destruction', knows_true_function: true, game_complete: true },
+    pacified: 4,
+    killed: 1,
+  }
+  saveGame({ player: { ...newPlayer('Ana'), humanity: 78, level: 4 }, story })
+  render(<App />)
+  await userEvent.click(screen.getByRole('button', { name: 'Continuar' }))
+  const end = await screen.findByRole('region', { name: /Final: Destruição/ })
+  expect(within(end).getByRole('heading', { name: 'Final: Destruição' })).toBeInTheDocument()
+  expect(within(end).getByText(/78%/)).toBeInTheDocument()
+  expect(within(end).getByText(/Inimigos pacificados:/)).toHaveTextContent('4')
+  expect(within(end).getByText(/Derrotados:/)).toHaveTextContent('1')
+  expect(within(end).getByText(/Verdade descoberta:/)).toHaveTextContent('Sim')
+  expect(within(end).getByText(/Jogue novamente\. As pistas estão em todo lugar\./)).toBeInTheDocument()
+  expect(within(end).getByRole('button', { name: 'Créditos' })).toBeInTheDocument()
   expect(within(end).getByRole('button', { name: /Voltar ao título/ })).toBeInTheDocument()
+})
+
+test('reloading a save in chapter 3 after a humanity step does not re-apply the shift', async () => {
+  const user = userEvent.setup()
+  // index 7 in chapter 3 start is right before { kind: 'humanity', delta: 10 } (index 8)
+  const story = { ...newStory(3), cursor: { label: 'start', index: 7 } }
+  saveGame({ player: newPlayer('Ana'), story })
+  const { unmount } = render(<App />)
+  await user.click(screen.getByRole('button', { name: 'Continuar' }))
+  // Advance once past index 7 ("Você chora..."), settling through humanity +10 onto index 10 ("Luz e código...")
+  await user.keyboard('{Enter}')
+  await user.keyboard('{Enter}')
+  const savedOnce = JSON.parse(localStorage.getItem('ruins-of-aether:save')!)
+  expect(savedOnce.player.humanity).toBe(60)
+  expect(savedOnce.story.humanityShift).toBe(0)
+  unmount()
+
+  render(<App />)
+  await user.click(screen.getByRole('button', { name: 'Continuar' }))
+  const savedAfterReload = JSON.parse(localStorage.getItem('ruins-of-aether:save')!)
+  expect(savedAfterReload.player.humanity).toBe(60)
 })
 
 test('a double tap on Continuar does not pick the choice that appears under it', async () => {

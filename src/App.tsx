@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import type { Outcome } from '@/game/battle'
-import { newPlayer, type Player } from '@/game/player'
+import { newPlayer, shiftHumanity, type Player } from '@/game/player'
 import { clearSave, loadGame, saveGame } from '@/game/save'
-import { CHAPTER_1 } from '@/story/chapter1'
-import { advance, cleanName, current, newStory } from '@/story/runner'
+import { CHAPTER_TITLES, LAST_CHAPTER, SCRIPTS } from '@/story'
+import { advance, cleanName, current, newStory, takeHumanityShift } from '@/story/runner'
 import type { Story } from '@/story/types'
 import { BattleScreen } from '@/ui/BattleScreen'
 import { ChapterEnd, Credits, NameScreen, TitleScreen } from '@/ui/MenuScreens'
@@ -11,14 +11,17 @@ import { SceneScreen } from '@/ui/SceneScreen'
 
 type Screen = { kind: 'title' } | { kind: 'name' } | { kind: 'credits' } | { kind: 'play'; player: Player; story: Story }
 
-const CHAPTER_TITLES: Record<number, string> = { 1: 'A Torre Inicial' }
-
-/** O save só vale se ainda cabe no roteiro atual (rótulo e posição existem). Se não, é descartado. */
+/** O save só vale se ainda cabe no roteiro atual (capítulo, rótulo e posição existem). Se não, é descartado. */
 function loadPlayableSave() {
   const s = loadGame()
   if (!s) return null
+  const script = SCRIPTS[s.story.chapter]
+  if (!script) {
+    clearSave()
+    return null
+  }
   try {
-    current(CHAPTER_1, s.story)
+    current(script, s.story, s.player.humanity)
     return s
   } catch {
     clearSave()
@@ -30,7 +33,9 @@ export function App() {
   const [screen, setScreen] = useState<Screen>({ kind: 'title' })
   const [hasSave, setHasSave] = useState(() => loadPlayableSave() !== null)
 
-  const play = (player: Player, story: Story) => {
+  const play = (rawPlayer: Player, rawStory: Story) => {
+    const { story, delta } = takeHumanityShift(rawStory)
+    const player = delta === 0 ? rawPlayer : shiftHumanity(rawPlayer, delta)
     saveGame({ player, story })
     setScreen({ kind: 'play', player, story })
   }
@@ -42,7 +47,7 @@ export function App() {
         hasSave={hasSave}
         onContinue={() => {
           const s = loadPlayableSave()
-          if (s) setScreen({ kind: 'play', player: s.player, story: s.story })
+          if (s) play(s.player, s.story)
           else setHasSave(false)
         }}
         onNew={() => {
@@ -59,12 +64,15 @@ export function App() {
     content = <Credits onBack={() => setScreen({ kind: 'title' })} />
   } else {
     const { player, story } = screen
-    const step = current(CHAPTER_1, story)
+    const script = SCRIPTS[story.chapter]
+    const step = current(script, story, player.humanity)
     if (step.kind === 'battle') {
-      const finish = (o: Outcome, p: Player) =>
+      const finish = (o: Outcome, p: Player) => {
         // Na derrota, o ERRO-7 "reinicia": volta como estava antes da luta, com a vida cheia.
-        play(o === 'defeat' ? { ...player, hp: player.maxHp, mp: player.maxMp } : p, advance(CHAPTER_1, story, { battle: o }))
-      content = <BattleScreen key={`${story.cursor.label}:${story.killed + story.pacified}`} player={player} enemy={step.enemy} onFinish={finish} />
+        const nextPlayer = o === 'defeat' ? { ...player, hp: player.maxHp, mp: player.maxMp } : p
+        play(nextPlayer, advance(script, story, { battle: o }, nextPlayer.humanity))
+      }
+      content = <BattleScreen key={`${story.chapter}:${story.cursor.label}:${story.killed + story.pacified}`} player={player} enemy={step.enemy} onFinish={finish} />
     } else if (step.kind === 'end') {
       content = (
         <ChapterEnd
@@ -72,6 +80,12 @@ export function App() {
           title={CHAPTER_TITLES[step.chapter]}
           player={player}
           story={story}
+          onNextChapter={
+            step.chapter < LAST_CHAPTER
+              ? () => play(player, { ...story, chapter: step.chapter + 1, cursor: { label: 'start', index: 0 } })
+              : undefined
+          }
+          onCredits={() => setScreen({ kind: 'credits' })}
           onTitle={() => {
             setHasSave(loadPlayableSave() !== null)
             setScreen({ kind: 'title' })
@@ -83,8 +97,8 @@ export function App() {
         <SceneScreen
           step={step}
           player={player}
-          onNext={() => play(player, advance(CHAPTER_1, story))}
-          onChoose={(i) => play(player, advance(CHAPTER_1, story, { option: i }))}
+          onNext={() => play(player, advance(script, story, undefined, player.humanity))}
+          onChoose={(i) => play(player, advance(script, story, { option: i }, player.humanity))}
         />
       )
     }
